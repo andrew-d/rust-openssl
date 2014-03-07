@@ -131,6 +131,7 @@ extern "C" {
     pub fn SSL_CTX_set_ex_data(ctx: *SSL_CTX, idx: c_int, data: *c_void)
                                -> c_int;
     pub fn SSL_CTX_get_ex_data(ctx: *SSL_CTX, idx: c_int) -> *c_void;
+    pub fn SSL_CTX_set_cipher_list(ctx: *SSL_CTX, str: *c_char) -> c_int;
 
     pub fn X509_STORE_CTX_get_ex_data(ctx: *X509_STORE_CTX, idx: c_int)
                                       -> *c_void;

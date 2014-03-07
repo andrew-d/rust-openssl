@@ -169,6 +169,21 @@ impl SslContext {
             None
         }
     }
+
+    /// Specifies the cipher suites that we attempt to connect with.
+    pub fn set_cipher_list(&mut self, ciphers: &str) -> Option<SslError> {
+        let ret = ciphers.with_c_str(|ciphers| {
+            unsafe {
+                ffi::SSL_CTX_set_cipher_list(self.ctx, ciphers)
+            }
+        });
+
+        if ret == 0 {
+            Some(SslError::get())
+        } else {
+            None
+        }
+    }
 }
 
 pub struct X509StoreContext {
