@@ -5,6 +5,7 @@ use std::libc::{c_int, c_void, c_long, c_ulong, c_char};
 
 pub type SSL_CTX = c_void;
 pub type SSL_METHOD = c_void;
+pub type SSL_CIPHER = c_void;
 pub type SSL = c_void;
 pub type BIO = c_void;
 pub type BIO_METHOD = c_void;
@@ -12,6 +13,7 @@ pub type X509_STORE_CTX = c_void;
 pub type X509 = c_void;
 pub type X509_NAME = c_void;
 pub type CRYPTO_EX_DATA = c_void;
+pub type STACK = c_void;
 
 pub type CRYPTO_EX_new = extern "C" fn(parent: *c_void, ptr: *c_void,
                                        ad: *CRYPTO_EX_DATA, idx: c_int,
@@ -151,10 +153,19 @@ extern "C" {
     pub fn SSL_write(ssl: *SSL, buf: *c_void, num: c_int) -> c_int;
     pub fn SSL_get_ex_data_X509_STORE_CTX_idx() -> c_int;
     pub fn SSL_get_SSL_CTX(ssl: *SSL) -> *SSL_CTX;
+    pub fn SSL_get_ciphers(ssl: *SSL) -> *STACK;
+
+    pub fn SSL_CIPHER_get_name(cipher: *SSL_CIPHER) -> *c_char;
+    pub fn SSL_CIPHER_get_bits(cipher: *SSL_CIPHER) -> c_int;
+    pub fn SSL_CIPHER_get_version(cipher: *SSL_CIPHER) -> *c_char;
+    pub fn SSL_CIPHER_get_description(cipher: *SSL_CIPHER, buf: *c_char, size: c_int) -> *c_char;
 
     pub fn BIO_s_mem() -> *BIO_METHOD;
     pub fn BIO_new(type_: *BIO_METHOD) -> *BIO;
     pub fn BIO_free_all(a: *BIO);
     pub fn BIO_read(b: *BIO, buf: *c_void, len: c_int) -> c_int;
     pub fn BIO_write(b: *BIO, buf: *c_void, len: c_int) -> c_int;
+
+    pub fn sk_num(s: *STACK) -> c_int;
+    pub fn sk_value(s: *STACK, i: c_int) -> *c_char;
 }

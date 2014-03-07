@@ -4,6 +4,7 @@ use std::libc::{c_int, c_void, c_char};
 use std::ptr;
 use std::io::{IoResult, IoError, OtherIoError, Stream, Reader, Writer};
 use std::unstable::mutex::NativeMutex;
+use std::c_str::{CString};
 use std::vec;
 
 use ssl::error::{SslError, SslSessionClosed, StreamError};
@@ -307,6 +308,45 @@ make_validation_error!(X509_V_OK,
     X509ApplicationVerification = X509_V_ERR_APPLICATION_VERIFICATION,
 )
 
+/// A structure representing a single SSL cipher
+pub struct SslCipher {
+    // Public stuff
+    name: ~str,
+    bits: int,
+    version: ~str,
+
+    // Pointer to the cipher
+    priv cipher: *ffi::SSL_CIPHER,
+}
+
+impl SslCipher {
+    fn from_cipher(cipher: *ffi::SSL_CIPHER) -> Option<~SslCipher> {
+        fn get_static_str(ptr: *c_char) -> ~str {
+            if ptr != ptr::null() {
+                let cstr = unsafe { CString::new(ptr, false) };
+                match cstr.as_str() {
+                    Some(s) => s.to_owned(),
+                    None => ~"",
+                }
+            } else {
+                ~""
+            }
+        }
+
+        let name = get_static_str(unsafe { ffi::SSL_CIPHER_get_name(cipher) });
+        let bits = unsafe { ffi::SSL_CIPHER_get_bits(cipher) };
+        let version = get_static_str(unsafe { ffi::SSL_CIPHER_get_version(cipher) });
+
+        Some(~SslCipher {
+            name: name,
+            bits: bits as int,
+            version: version,
+
+            cipher: cipher,
+        })
+    }
+}
+
 struct Ssl {
     ssl: *ffi::SSL
 }
@@ -379,6 +419,26 @@ impl Ssl {
             Some(err) => err,
             None => unreachable!()
         }
+    }
+
+    fn get_ciphers(&self) -> Result<~[~SslCipher], SslError> {
+        let mut ciphers = ~[];
+
+        let ptr = unsafe { ffi::SSL_get_ciphers(self.ssl) };
+        if ptr == ptr::null() {
+            return Ok(ciphers);
+        }
+
+        let num_ciphers = unsafe { ffi::sk_num(ptr) };
+        for i in range(0, num_ciphers) {
+            let cipher = unsafe { ffi::sk_value(ptr, i) as *ffi::SSL_CIPHER };
+            match SslCipher::from_cipher(cipher) {
+                Some(c) => ciphers.push(c),
+                None => {}
+            }
+        }
+
+        Ok(ciphers)
     }
 }
 
@@ -456,23 +516,33 @@ pub struct SslStream<S> {
 }
 
 impl<S: Stream> SslStream<S> {
-    /// Attempts to create a new SSL stream
-    pub fn try_new(ctx: &SslContext, stream: S) -> Result<SslStream<S>,
-                                                          SslError> {
+    /// Attempt to create a new SSL stream, without connecting to anything
+    pub fn try_new_unconnected(ctx: &SslContext, stream: S)
+        -> Result<SslStream<S>, SslError> {
         let ssl = match Ssl::try_new(ctx) {
             Ok(ssl) => ssl,
             Err(err) => return Err(err)
         };
 
-        let mut ssl = SslStream {
+        Ok(SslStream {
             stream: stream,
             ssl: ssl,
             // Maximum TLS record size is 16k
             buf: vec::from_elem(16 * 1024, 0u8)
+        })
+    }
+
+    /// Attempts to create a new SSL stream
+    pub fn try_new(ctx: &SslContext, stream: S) -> Result<SslStream<S>,
+                                                          SslError> {
+
+        let mut st = match SslStream::try_new_unconnected(ctx, stream) {
+            Ok(st) => st,
+            Err(err) => return Err(err)
         };
 
-        match ssl.in_retry_wrapper(|ssl| { ssl.connect() }) {
-            Ok(_) => Ok(ssl),
+        match st.in_retry_wrapper(|ssl| { ssl.connect() }) {
+            Ok(_) => Ok(st),
             Err(err) => Err(err)
         }
     }
@@ -518,6 +588,10 @@ impl<S: Stream> SslStream<S> {
                 None => break
             };
         }
+    }
+
+    pub fn get_ciphers(&self) -> Result<~[~SslCipher], SslError> {
+        self.ssl.get_ciphers()
     }
 }
 
