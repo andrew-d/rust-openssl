@@ -334,7 +334,7 @@ impl SslCipher {
         }
 
         let name = get_static_str(unsafe { ffi::SSL_CIPHER_get_name(cipher) });
-        let bits = unsafe { ffi::SSL_CIPHER_get_bits(cipher) };
+        let bits = unsafe { ffi::SSL_CIPHER_get_bits(cipher, ptr::null()) };
         let version = get_static_str(unsafe { ffi::SSL_CIPHER_get_version(cipher) });
 
         Some(~SslCipher {

@@ -156,7 +156,7 @@ extern "C" {
     pub fn SSL_get_ciphers(ssl: *SSL) -> *STACK;
 
     pub fn SSL_CIPHER_get_name(cipher: *SSL_CIPHER) -> *c_char;
-    pub fn SSL_CIPHER_get_bits(cipher: *SSL_CIPHER) -> c_int;
+    pub fn SSL_CIPHER_get_bits(cipher: *SSL_CIPHER, alg_bits: *c_int) -> c_int;
     pub fn SSL_CIPHER_get_version(cipher: *SSL_CIPHER) -> *c_char;
     pub fn SSL_CIPHER_get_description(cipher: *SSL_CIPHER, buf: *c_char, size: c_int) -> *c_char;
 
