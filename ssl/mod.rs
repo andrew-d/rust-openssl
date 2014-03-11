@@ -347,8 +347,8 @@ impl SslCipher {
     }
 }
 
-struct Ssl {
-    ssl: *ffi::SSL
+pub struct Ssl {
+    priv ssl: *ffi::SSL
 }
 
 impl Drop for Ssl {
@@ -358,7 +358,7 @@ impl Drop for Ssl {
 }
 
 impl Ssl {
-    fn try_new(ctx: &SslContext) -> Result<Ssl, SslError> {
+    pub fn try_new(ctx: &SslContext) -> Result<Ssl, SslError> {
         let ssl = unsafe { ffi::SSL_new(ctx.ctx) };
         if ssl == ptr::null() {
             return Err(SslError::get());
@@ -421,7 +421,7 @@ impl Ssl {
         }
     }
 
-    fn get_ciphers(&self) -> Result<~[~SslCipher], SslError> {
+    pub fn get_ciphers(&self) -> Result<~[~SslCipher], SslError> {
         let mut ciphers = ~[];
 
         let ptr = unsafe { ffi::SSL_get_ciphers(self.ssl) };
@@ -516,33 +516,40 @@ pub struct SslStream<S> {
 }
 
 impl<S: Stream> SslStream<S> {
-    /// Attempt to create a new SSL stream, without connecting to anything
-    pub fn try_new_unconnected(ctx: &SslContext, stream: S)
-        -> Result<SslStream<S>, SslError> {
-        let ssl = match Ssl::try_new(ctx) {
-            Ok(ssl) => ssl,
-            Err(err) => return Err(err)
-        };
-
-        Ok(SslStream {
+    /// Attempt to create a new SslStream from a given Ssl instance.
+    /// Takes ownership of the Ssl instance so it can't be used elsewhere.
+    pub fn try_new_from(ssl: Ssl, stream: S) -> Result<SslStream<S>,
+                                                       SslError> {
+        let mut st = SslStream {
             stream: stream,
             ssl: ssl,
             // Maximum TLS record size is 16k
             buf: vec::from_elem(16 * 1024, 0u8)
-        })
+        };
+
+        match st.in_retry_wrapper(|ssl| { ssl.connect() }) {
+            Ok(_) => Ok(st),
+            Err(err) => Err(err)
+        }
     }
 
     /// Attempts to create a new SSL stream
     pub fn try_new(ctx: &SslContext, stream: S) -> Result<SslStream<S>,
                                                           SslError> {
-
-        let mut st = match SslStream::try_new_unconnected(ctx, stream) {
-            Ok(st) => st,
+        let ssl = match Ssl::try_new(ctx) {
+            Ok(ssl) => ssl,
             Err(err) => return Err(err)
         };
 
-        match st.in_retry_wrapper(|ssl| { ssl.connect() }) {
-            Ok(_) => Ok(st),
+        let mut ssl = SslStream {
+            stream: stream,
+            ssl: ssl,
+            // Maximum TLS record size is 16k
+            buf: vec::from_elem(16 * 1024, 0u8)
+        };
+
+        match ssl.in_retry_wrapper(|ssl| { ssl.connect() }) {
+            Ok(_) => Ok(ssl),
             Err(err) => Err(err)
         }
     }
@@ -588,10 +595,6 @@ impl<S: Stream> SslStream<S> {
                 None => break
             };
         }
-    }
-
-    pub fn get_ciphers(&self) -> Result<~[~SslCipher], SslError> {
-        self.ssl.get_ciphers()
     }
 }
 
