@@ -320,6 +320,7 @@ make_validation_error!(X509_V_OK,
 )
 
 /// A structure representing a single SSL cipher
+#[deriving(Clone)]
 pub struct SslCipher {
     // Public stuff
     name: ~str,
