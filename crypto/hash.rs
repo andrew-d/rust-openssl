@@ -1,3 +1,5 @@
+#[allow(deprecated_owned_vector)];
+
 use std::libc::c_uint;
 use std::libc;
 use std::ptr;

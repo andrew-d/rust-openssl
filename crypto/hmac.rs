@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#[allow(deprecated_owned_vector)];
+
 use std::libc::{c_uchar, c_int, c_uint};
 use std::ptr;
 use std::vec;

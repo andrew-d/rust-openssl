@@ -1,3 +1,5 @@
+#[allow(deprecated_owned_vector)];
+
 use std::libc::c_int;
 use std::vec;
 

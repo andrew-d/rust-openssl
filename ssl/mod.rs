@@ -1,3 +1,5 @@
+#[allow(deprecated_owned_vector)];
+
 use sync::one::{Once, ONCE_INIT};
 use std::cast;
 use std::libc::{c_int, c_void, c_char};
