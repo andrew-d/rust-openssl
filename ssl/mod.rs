@@ -536,7 +536,7 @@ impl<S: Stream> SslStream<S> {
             stream: stream,
             ssl: ssl,
             // Maximum TLS record size is 16k
-            buf: vec::from_elem(16 * 1024, 0u8)
+            buf: Vec::from_elem(16 * 1024, 0u8)
         };
 
         match st.in_retry_wrapper(|ssl| { ssl.connect() }) {
