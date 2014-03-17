@@ -1,5 +1,3 @@
-#[allow(deprecated_owned_vector)];
-
 use sync::one::{Once, ONCE_INIT};
 use std::cast;
 use std::libc::{c_int, c_void, c_char};
@@ -433,8 +431,8 @@ impl Ssl {
         }
     }
 
-    pub fn get_ciphers(&self) -> Result<~[~SslCipher], SslError> {
-        let mut ciphers = ~[];
+    pub fn get_ciphers(&self) -> Result<Vec<~SslCipher>, SslError> {
+        let mut ciphers = Vec::new();
 
         let ptr = unsafe { ffi::SSL_get_ciphers(self.ssl) };
         if ptr == ptr::null() {
