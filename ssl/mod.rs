@@ -42,6 +42,9 @@ fn init() {
             MUTEXES = cast::transmute(mutexes);
 
             ffi::CRYPTO_set_locking_callback(locking_function);
+            ffi::CRYPTO_set_dynlock_create_callback(dyn_create_function);
+            ffi::CRYPTO_set_dynlock_lock_callback(dyn_lock_function);
+            ffi::CRYPTO_set_dynlock_destroy_callback(dyn_destroy_function);
         });
     }
 }
@@ -88,20 +91,33 @@ pub enum SslVerifyMode {
     SslVerifyNone = ffi::SSL_VERIFY_NONE
 }
 
-extern "C" fn locking_function(mode: c_int, n: c_int, _file: *c_char,
+extern fn locking_function(mode: c_int, n: c_int, _file: *c_char,
                                _line: c_int) {
-    unsafe {
-        let mutex = (*MUTEXES).get_mut(n as uint);
+    unsafe { inner_lock(mode, (*MUTEXES).get_mut(n as uint)); }
+}
 
-        if mode & ffi::CRYPTO_LOCK != 0 {
-            mutex.lock_noguard();
-        } else {
-            mutex.unlock_noguard();
-        }
+extern fn dyn_create_function(_file: *c_char, _line: c_int) -> *c_void {
+    unsafe { cast::transmute(~NativeMutex::new()) }
+}
+
+extern fn dyn_lock_function(mode: c_int, l: *c_void, _file: *c_char,
+                            _line: c_int) {
+    unsafe { inner_lock(mode, cast::transmute(l)); }
+}
+
+extern fn dyn_destroy_function(l: *c_void, _file: *c_char, _line: c_int) {
+    unsafe { let _mutex: ~NativeMutex = cast::transmute(l); }
+}
+
+unsafe fn inner_lock(mode: c_int, lock: &mut NativeMutex) {
+    if mode & ffi::CRYPTO_LOCK != 0 {
+        lock.lock_noguard();
+    } else {
+        lock.unlock_noguard();
     }
 }
 
-extern "C" fn raw_verify(preverify_ok: c_int, x509_ctx: *ffi::X509_STORE_CTX)
+extern fn raw_verify(preverify_ok: c_int, x509_ctx: *ffi::X509_STORE_CTX)
         -> c_int {
     unsafe {
         let idx = ffi::SSL_get_ex_data_X509_STORE_CTX_idx();
