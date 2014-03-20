@@ -4,7 +4,7 @@ use std::cast;
 use std::libc::{c_char, c_int, c_uint};
 use std::libc;
 use std::ptr;
-use std::vec;
+use std::slice;
 use crypto::hash::{HashType, MD5, SHA1, SHA224, SHA256, SHA384, SHA512};
 
 #[allow(non_camel_case_types)]
@@ -96,7 +96,7 @@ impl PKey {
         unsafe {
             let len = f(self.evp, ptr::null());
             if len < 0 as c_int { return ~[]; }
-            let mut s = vec::from_elem(len as uint, 0u8);
+            let mut s = slice::from_elem(len as uint, 0u8);
 
             let r = f(self.evp, &s.as_mut_ptr());
 
@@ -221,7 +221,7 @@ impl PKey {
 
             assert!(s.len() < self.max_data());
 
-            let mut r = vec::from_elem(len as uint + 1u, 0u8);
+            let mut r = slice::from_elem(len as uint + 1u, 0u8);
 
             let rv = RSA_public_encrypt(
                 s.len() as c_uint,
@@ -246,7 +246,7 @@ impl PKey {
 
             assert_eq!(s.len() as c_uint, RSA_size(rsa));
 
-            let mut r = vec::from_elem(len as uint + 1u, 0u8);
+            let mut r = slice::from_elem(len as uint + 1u, 0u8);
 
             let rv = RSA_private_decrypt(
                 s.len() as c_uint,
@@ -291,7 +291,7 @@ impl PKey {
         unsafe {
             let rsa = EVP_PKEY_get1_RSA(self.evp);
             let mut len = RSA_size(rsa);
-            let mut r = vec::from_elem(len as uint + 1u, 0u8);
+            let mut r = slice::from_elem(len as uint + 1u, 0u8);
 
             let rv = RSA_sign(
                 openssl_hash_nid(hash),

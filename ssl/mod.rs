@@ -5,7 +5,7 @@ use std::ptr;
 use std::io::{IoResult, IoError, OtherIoError, EndOfFile, Stream, Reader, Writer};
 use std::unstable::mutex::NativeMutex;
 use std::c_str::{CString};
-use std::vec_ng::Vec;
+use std::vec::Vec;
 
 use ssl::error::{SslError, SslSessionClosed, StreamError};
 

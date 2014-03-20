@@ -1,6 +1,6 @@
 use std::libc::c_ulong;
 use std::io::IoError;
-use std::vec_ng::Vec;
+use std::vec::Vec;
 
 use ssl::ffi;
 
