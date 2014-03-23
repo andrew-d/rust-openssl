@@ -448,6 +448,22 @@ impl Ssl {
         }
     }
 
+    /// Sets the host name to be used with SNI.
+    pub fn set_hostname(&self, hostname: &str) {
+        // TODO: what do we use as a return value?
+        let _ = hostname.with_c_str(|hostname| {
+            unsafe {
+                // This is defined as a macro:
+                //      #define SSL_set_tlsext_host_name(s,name) \
+                //          SSL_ctrl(s,SSL_CTRL_SET_TLSEXT_HOSTNAME,TLSEXT_NAMETYPE_host_name,(char *)name)
+
+                ffi::SSL_ctrl(self.ssl, ffi::SSL_CTRL_SET_TLSEXT_HOSTNAME,
+                              ffi::TLSEXT_NAMETYPE_host_name,
+                              hostname as *c_void);
+            }
+        });
+    }
+
     pub fn get_ciphers(&self) -> Result<Vec<~SslCipher>, SslError> {
         let mut ciphers = Vec::new();
 

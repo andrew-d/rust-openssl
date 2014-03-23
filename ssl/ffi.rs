@@ -42,7 +42,10 @@ pub static SSL_ERROR_WANT_ACCEPT: c_int = 8;
 pub static SSL_VERIFY_NONE: c_int = 0;
 pub static SSL_VERIFY_PEER: c_int = 1;
 
+pub static SSL_CTRL_SET_TLSEXT_HOSTNAME: c_int = 55;
 pub static SSL_CTRL_GET_RI_SUPPORT: c_int = 76;
+
+pub static TLSEXT_NAMETYPE_host_name: c_long = 0;
 
 pub static X509_V_OK: c_int = 0;
 pub static X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT: c_int = 2;
