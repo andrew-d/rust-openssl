@@ -42,6 +42,8 @@ pub static SSL_ERROR_WANT_ACCEPT: c_int = 8;
 pub static SSL_VERIFY_NONE: c_int = 0;
 pub static SSL_VERIFY_PEER: c_int = 1;
 
+pub static SSL_CTRL_GET_RI_SUPPORT: c_int = 76;
+
 pub static X509_V_OK: c_int = 0;
 pub static X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT: c_int = 2;
 pub static X509_V_ERR_UNABLE_TO_GET_CRL: c_int = 3;
@@ -153,6 +155,7 @@ extern "C" {
     pub fn SSL_get_rbio(ssl: *SSL) -> *BIO;
     pub fn SSL_get_wbio(ssl: *SSL) -> *BIO;
     pub fn SSL_connect(ssl: *SSL) -> c_int;
+    pub fn SSL_ctrl(ssl: *SSL, cmd: c_int, larg: c_long, parg: *c_void) -> c_long;
     pub fn SSL_get_error(ssl: *SSL, ret: c_int) -> c_int;
     pub fn SSL_read(ssl: *SSL, buf: *c_void, num: c_int) -> c_int;
     pub fn SSL_write(ssl: *SSL, buf: *c_void, num: c_int) -> c_int;

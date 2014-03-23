@@ -637,6 +637,21 @@ impl<S: Stream> SslStream<S> {
             None => return Some(~""),
         }
     }
+
+    /// Returns whether the peer supports secure renegotiation.
+    pub fn secure_renegotiation_supported(&self) -> bool {
+        return unsafe {
+            // Normally, we'd do something like this:
+            //      ffi::SSL_get_secure_renegotiation_support(self.ssl.ssl)
+            //
+            // Except, it's a macro, defined as:
+            //      #define SSL_get_secure_renegotiation_support(ssl) \
+            //          SSL_ctrl((ssl), SSL_CTRL_GET_RI_SUPPORT, 0, NULL)
+            let o = ffi::SSL_ctrl(self.ssl.ssl, ffi::SSL_CTRL_GET_RI_SUPPORT,
+                                  0, ptr::null());
+            o != 0
+        };
+    }
 }
 
 impl<S: Stream> Reader for SslStream<S> {
