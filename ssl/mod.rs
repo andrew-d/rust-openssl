@@ -620,6 +620,23 @@ impl<S: Stream> SslStream<S> {
         }
         Ok(())
     }
+
+    /// Get the compression currently in use.  The result will be
+    /// either None, indicating no compression is in use, or a string
+    /// with the compression name.
+    pub fn get_compression(&self) -> Option<~str> {
+        let ptr = unsafe { ffi::SSL_get_current_compression(self.ssl.ssl) };
+        if ptr == ptr::null() {
+            return None;
+        }
+
+        let meth = unsafe { ffi::SSL_COMP_get_name(ptr) };
+        let cstr = unsafe { CString::new(meth, false) };
+        match cstr.as_str() {
+            Some(s) => return Some(s.to_owned()),
+            None => return Some(~""),
+        }
+    }
 }
 
 impl<S: Stream> Reader for SslStream<S> {

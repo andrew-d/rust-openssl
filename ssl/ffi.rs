@@ -6,6 +6,7 @@ use std::libc::{c_int, c_void, c_long, c_ulong, c_char};
 pub type SSL_CTX = c_void;
 pub type SSL_METHOD = c_void;
 pub type SSL_CIPHER = c_void;
+pub type COMP_METHOD = c_void;
 pub type SSL = c_void;
 pub type BIO = c_void;
 pub type BIO_METHOD = c_void;
@@ -158,11 +159,15 @@ extern "C" {
     pub fn SSL_get_ex_data_X509_STORE_CTX_idx() -> c_int;
     pub fn SSL_get_SSL_CTX(ssl: *SSL) -> *SSL_CTX;
     pub fn SSL_get_ciphers(ssl: *SSL) -> *STACK;
+    pub fn SSL_get_current_compression(ssl: *SSL) -> *COMP_METHOD;
+    pub fn SSL_get_current_expansion(ssl: *SSL) -> *COMP_METHOD;
 
     pub fn SSL_CIPHER_get_name(cipher: *SSL_CIPHER) -> *c_char;
     pub fn SSL_CIPHER_get_bits(cipher: *SSL_CIPHER, alg_bits: *c_int) -> c_int;
     pub fn SSL_CIPHER_get_version(cipher: *SSL_CIPHER) -> *c_char;
     pub fn SSL_CIPHER_get_description(cipher: *SSL_CIPHER, buf: *c_char, size: c_int) -> *c_char;
+
+    pub fn SSL_COMP_get_name(comp: *COMP_METHOD) -> *c_char;
 
     pub fn BIO_s_mem() -> *BIO_METHOD;
     pub fn BIO_new(type_: *BIO_METHOD) -> *BIO;
