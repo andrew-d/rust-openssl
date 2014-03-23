@@ -50,6 +50,7 @@ fn init() {
 }
 
 /// Determines the SSL method supported
+#[deriving(Eq, Hash, Show)]
 pub enum SslMethod {
     #[cfg(sslv2)]
     /// Only support the SSLv2 protocol
