@@ -42,8 +42,10 @@ pub static SSL_ERROR_WANT_ACCEPT: c_int = 8;
 pub static SSL_VERIFY_NONE: c_int = 0;
 pub static SSL_VERIFY_PEER: c_int = 1;
 
+pub static SSL_CTRL_OPTIONS: c_int = 32;
 pub static SSL_CTRL_SET_TLSEXT_HOSTNAME: c_int = 55;
 pub static SSL_CTRL_GET_RI_SUPPORT: c_int = 76;
+pub static SSL_CTRL_CLEAR_OPTIONS: c_int = 77;
 
 pub static TLSEXT_NAMETYPE_host_name: c_long = 0;
 
@@ -144,6 +146,7 @@ extern "C" {
                                -> c_int;
     pub fn SSL_CTX_get_ex_data(ctx: *SSL_CTX, idx: c_int) -> *c_void;
     pub fn SSL_CTX_set_cipher_list(ctx: *SSL_CTX, str: *c_char) -> c_int;
+    pub fn SSL_CTX_ctrl(ctx: *SSL_CTX, cmd: c_int, larg: c_long, parg: *c_void) -> c_long;
 
     pub fn X509_STORE_CTX_get_ex_data(ctx: *X509_STORE_CTX, idx: c_int)
                                       -> *c_void;

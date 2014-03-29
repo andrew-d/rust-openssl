@@ -1,6 +1,6 @@
 use sync::one::{Once, ONCE_INIT};
 use std::cast;
-use std::libc::{c_int, c_void, c_char};
+use std::libc::{c_int, c_long, c_void, c_char};
 use std::ptr;
 use std::io::{IoResult, IoError, OtherIoError, EndOfFile, Stream, Reader, Writer};
 use std::unstable::mutex::NativeMutex;
@@ -140,6 +140,10 @@ extern fn raw_verify(preverify_ok: c_int, x509_ctx: *ffi::X509_STORE_CTX)
 pub type VerifyCallback = fn(preverify_ok: bool,
                              x509_ctx: &X509StoreContext) -> bool;
 
+pub enum SslOption {
+    LegacyRenegotiation = 0x0004000,
+}
+
 /// An SSL context object
 pub struct SslContext {
     priv ctx: *ffi::SSL_CTX
@@ -209,6 +213,32 @@ impl SslContext {
             Some(SslError::get())
         } else {
             None
+        }
+    }
+
+    /// Sets option on the context.
+    pub fn set_options(&mut self, option: SslOption) {
+        // TODO: return value?
+        unsafe {
+            let _ = ffi::SSL_CTX_ctrl(
+                self.ctx,
+                ffi::SSL_CTRL_OPTIONS,
+                option as c_long,
+                ptr::null()
+            );
+        }
+    }
+
+    /// Clear options on this context.
+    pub fn clear_options(&mut self, option: SslOption) {
+        // TODO: return value?
+        unsafe {
+            let _ = ffi::SSL_CTX_ctrl(
+                self.ctx,
+                ffi::SSL_CTRL_CLEAR_OPTIONS,
+                option as c_long,
+                ptr::null()
+            );
         }
     }
 }
@@ -335,6 +365,7 @@ make_validation_error!(X509_V_OK,
 )
 
 /// A structure representing a single SSL cipher
+#[allow(raw_pointer_deriving)]
 #[deriving(Clone)]
 pub struct SslCipher {
     // Public stuff
