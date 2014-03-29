@@ -170,6 +170,8 @@ extern "C" {
     pub fn SSL_get_ciphers(ssl: *SSL) -> *STACK;
     pub fn SSL_get_current_compression(ssl: *SSL) -> *COMP_METHOD;
     pub fn SSL_get_current_expansion(ssl: *SSL) -> *COMP_METHOD;
+    pub fn SSL_renegotiate(ssl: *SSL) -> c_int;
+    pub fn SSL_do_handshake(ssl: *SSL) -> c_int;
 
     pub fn SSL_CIPHER_get_name(cipher: *SSL_CIPHER) -> *c_char;
     pub fn SSL_CIPHER_get_bits(cipher: *SSL_CIPHER, alg_bits: *c_int) -> c_int;

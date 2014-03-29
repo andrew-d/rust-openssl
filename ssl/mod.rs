@@ -699,6 +699,36 @@ impl<S: Stream> SslStream<S> {
             o != 0
         };
     }
+
+    /// Try to initiate renegotiation.
+    pub fn renegotiate(&mut self) -> bool {
+        unsafe {
+            ffi::SSL_renegotiate(self.ssl.ssl);
+        }
+
+        let ret = self.in_retry_wrapper(|ssl| {
+            unsafe { ffi::SSL_do_handshake(ssl.ssl) }
+        });
+
+        match ret {
+            Ok(code) => {
+                match code {
+                    // Not successful, but shut down cleanly.
+                    0 => false,
+
+                    // Successful.
+                    1 => true,
+
+                    // Other error.
+                    _ => false,
+                }
+            },
+            Err(e) => {
+                // TODO: more info
+                false
+            }
+        }
+    }
 }
 
 impl<S: Stream> Reader for SslStream<S> {
