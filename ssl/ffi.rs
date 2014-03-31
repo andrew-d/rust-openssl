@@ -1,5 +1,4 @@
-#[doc(hidden)];
-#[allow(non_camel_case_types)];
+#![allow(non_camel_case_types)]
 
 use std::libc::{c_int, c_void, c_long, c_ulong, c_char};
 
@@ -134,7 +133,7 @@ extern "C" {
     pub fn SSL_CTX_new(method: *SSL_METHOD) -> *SSL_CTX;
     pub fn SSL_CTX_free(ctx: *SSL_CTX);
     pub fn SSL_CTX_set_verify(ctx: *SSL_CTX, mode: c_int,
-                              verify_callback: Option<extern "C" fn(c_int, *X509_STORE_CTX) -> c_int>);
+                              verify_callback: Option<extern fn(c_int, *X509_STORE_CTX) -> c_int>);
     pub fn SSL_CTX_load_verify_locations(ctx: *SSL_CTX, CAfile: *c_char,
                                          CApath: *c_char) -> c_int;
     pub fn SSL_CTX_get_ex_new_index(argl: c_long, argp: *c_void,

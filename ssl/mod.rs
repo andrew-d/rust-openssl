@@ -2,7 +2,7 @@ use sync::one::{Once, ONCE_INIT};
 use std::cast;
 use std::libc::{c_int, c_long, c_void, c_char};
 use std::ptr;
-use std::io::{IoResult, IoError, OtherIoError, EndOfFile, Stream, Reader, Writer};
+use std::io::{IoResult, IoError, EndOfFile, Stream, Reader, Writer};
 use std::unstable::mutex::NativeMutex;
 use std::c_str::{CString};
 use std::vec::Vec;
@@ -93,7 +93,7 @@ pub enum SslVerifyMode {
 }
 
 extern fn locking_function(mode: c_int, n: c_int, _file: *c_char,
-                               _line: c_int) {
+                           _line: c_int) {
     unsafe { inner_lock(mode, (*MUTEXES).get_mut(n as uint)); }
 }
 
