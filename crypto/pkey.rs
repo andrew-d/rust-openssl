@@ -1,4 +1,4 @@
-#[allow(deprecated_owned_vector)];
+#![allow(deprecated_owned_vector)]
 
 use std::cast;
 use std::libc::{c_char, c_int, c_uint};
