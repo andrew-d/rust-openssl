@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-#![allow(deprecated_owned_vector)]
-
-use std::libc::{c_uchar, c_int, c_uint};
+use libc::{c_uchar, c_int, c_uint};
 use std::ptr;
 use std::slice;
 use crypto::hash;
@@ -39,8 +37,8 @@ extern {
 }
 
 pub struct HMAC {
-    priv ctx: HMAC_CTX,
-    priv len: uint,
+    ctx: HMAC_CTX,
+    len: uint,
 }
 
 pub fn HMAC(ht: hash::HashType, key: ~[u8]) -> HMAC {

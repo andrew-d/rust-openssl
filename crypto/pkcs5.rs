@@ -1,6 +1,4 @@
-#![allow(deprecated_owned_vector)]
-
-use std::libc::c_int;
+use libc::c_int;
 use std::slice;
 
 #[link(name = "crypto")]

@@ -1,6 +1,6 @@
 use sync::one::{Once, ONCE_INIT};
 use std::cast;
-use std::libc::{c_int, c_long, c_void, c_char};
+use libc::{c_int, c_void, c_char, c_long};
 use std::ptr;
 use std::io::{IoResult, IoError, EndOfFile, Stream, Reader, Writer};
 use std::unstable::mutex::NativeMutex;
@@ -146,7 +146,7 @@ pub enum SslOption {
 
 /// An SSL context object
 pub struct SslContext {
-    priv ctx: *ffi::SSL_CTX
+    ctx: *ffi::SSL_CTX
 }
 
 impl Drop for SslContext {
@@ -172,7 +172,7 @@ impl SslContext {
     pub fn new(method: SslMethod) -> SslContext {
         match SslContext::try_new(method) {
             Ok(ctx) => ctx,
-            Err(err) => fail!("Error creating SSL context: {:?}", err)
+            Err(err) => fail!("Error creating SSL context: {}", err)
         }
     }
 
@@ -244,7 +244,7 @@ impl SslContext {
 }
 
 pub struct X509StoreContext {
-    priv ctx: *ffi::X509_STORE_CTX
+    ctx: *ffi::X509_STORE_CTX
 }
 
 impl X509StoreContext {
@@ -266,8 +266,8 @@ impl X509StoreContext {
 
 /// A public key certificate
 pub struct X509<'ctx> {
-    priv ctx: &'ctx X509StoreContext,
-    priv x509: *ffi::X509
+    ctx: &'ctx X509StoreContext,
+    x509: *ffi::X509
 }
 
 impl<'ctx> X509<'ctx> {
@@ -278,8 +278,8 @@ impl<'ctx> X509<'ctx> {
 }
 
 pub struct X509Name<'x> {
-    priv x509: &'x X509<'x>,
-    priv name: *ffi::X509_NAME
+    x509: &'x X509<'x>,
+    name: *ffi::X509_NAME
 }
 
 pub enum X509NameFormat {
@@ -369,12 +369,12 @@ make_validation_error!(X509_V_OK,
 #[deriving(Clone)]
 pub struct SslCipher {
     // Public stuff
-    name: ~str,
-    bits: int,
-    version: ~str,
+    pub name: ~str,
+    pub bits: int,
+    pub version: ~str,
 
     // Pointer to the cipher
-    priv cipher: *ffi::SSL_CIPHER,
+    cipher: *ffi::SSL_CIPHER,
 }
 
 impl SslCipher {
@@ -406,7 +406,7 @@ impl SslCipher {
 }
 
 pub struct Ssl {
-    priv ssl: *ffi::SSL
+    ssl: *ffi::SSL
 }
 
 impl Drop for Ssl {
@@ -584,9 +584,9 @@ impl MemBio {
 
 /// A stream wrapper which handles SSL encryption for an underlying stream.
 pub struct SslStream<S> {
-    priv stream: S,
-    priv ssl: Ssl,
-    priv buf: Vec<u8>
+    stream: S,
+    ssl: Ssl,
+    buf: Vec<u8>
 }
 
 impl<S: Stream> SslStream<S> {
@@ -632,7 +632,7 @@ impl<S: Stream> SslStream<S> {
     pub fn new(ctx: &SslContext, stream: S) -> SslStream<S> {
         match SslStream::try_new(ctx, stream) {
             Ok(stream) => stream,
-            Err(err) => fail!("Error creating SSL stream: {:?}", err)
+            Err(err) => fail!("Error creating SSL stream: {}", err)
         }
     }
 

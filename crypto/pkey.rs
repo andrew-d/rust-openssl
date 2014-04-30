@@ -1,8 +1,8 @@
 #![allow(deprecated_owned_vector)]
 
 use std::cast;
-use std::libc::{c_char, c_int, c_uint};
-use std::libc;
+use libc::{c_char, c_int, c_uint};
+use libc;
 use std::ptr;
 use std::slice;
 use crypto::hash::{HashType, MD5, SHA1, SHA224, SHA256, SHA384, SHA512};
@@ -77,8 +77,8 @@ fn openssl_hash_nid(hash: HashType) -> c_int {
 }
 
 pub struct PKey {
-    priv evp: *EVP_PKEY,
-    priv parts: Parts,
+    evp: *EVP_PKEY,
+    parts: Parts,
 }
 
 /// Represents a public key, optionally with a private key attached.
